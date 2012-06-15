@@ -1,0 +1,276 @@
+<?php
+/**
+ * @author amine.cherif
+ * @desc add the jcookies Plugin, call as a script to Head meta
+ * @date 23 mai 2012
+ *  
+ */
+function add_jcookies_plugin() {
+	drupal_add_js(drupal_get_path('module', 'kdevteam') . '/js/jcookies.js');
+}
+/**
+ * @author amine.cherif
+ * @desc add the common.js file, call as a script to Head meta
+ * @date 23 mai 2012
+ *  
+ */
+function add_commun_js() {
+	drupal_add_js(drupal_get_path('module', 'kdevteam') . '/js/common.js');
+}
+/**
+ * @author amine.cherif
+ * @desc add the twitter bootstrap files, call as a script to Head meta
+ * @date 23 mai 2012
+ *  
+ */
+function add_twitter_bootsrap_js() {
+	drupal_add_js(drupal_get_path('module', 'kdevteam') . '/js/bootstrap.min.js');
+}
+/**
+ * @author amine.cherif
+ * @desc add the twitter bootstrap files, call as a script to Head meta
+ * @date 23 mai 2012
+ *  
+ */
+function add_twitter_bootsrap_css() {
+	drupal_add_css(drupal_get_path('module', 'kdevteam') . '/css/bootstrap.min.css','all', FALSE);
+}
+
+/**
+ * @desc call common php functions
+ * @author amine.cherif
+ */
+module_load_include('inc', 'kdevteam', 'includes/common');
+
+/**
+ * hook init
+ */
+
+function kdevteam_init(){
+	if('admin' != arg(0)){
+		variable_get('_twitter_bootstrap', 0) ? add_twitter_bootsrap_css() : 0;
+	}
+}
+
+/**
+ * hook preprocess_page
+ */
+function kdevteam_preprocess_page(&$vars, $hook){
+	if('admin' != arg(0)){
+		variable_get('common', 0) ? add_commun_js() : 0;
+		variable_get('jCookies', 0) ? add_jcookies_plugin() : 0;
+		variable_get('twitter_bootstrap', 0) ? add_twitter_bootsrap_js() :0;
+	}
+	
+}
+
+/**
+ * hook preprocess_node
+ * @param unknown_type $vars
+ * @param unknown_type $hook
+ */
+function kdevteam_preprocess_node(&$vars, $hook) {
+
+	
+
+	drupal_add_css(
+			path_to_theme() .'/css/types/'. $vars['node']->type .'.css',
+			'theme', 'all', FALSE
+	);
+
+	drupal_add_css(
+			path_to_theme() .'/css/nodes/nid-'. $vars['node']->nid .'.css',
+			'theme', 'all', FALSE
+	);
+	
+}
+
+
+/**
+ * hook menu
+ */
+
+function kdevteam_menu() {
+	$items = array();
+	$items['admin/mytools/kdevteam'] = array(
+			'title' => 'Kdev Team Tools settings',
+			'description' => 'Helper functions, to assist Drupal developers.',
+			'page callback' => 'drupal_get_form',
+			'page arguments' => array('kdevteam_admin_settings'),
+			'access arguments' => array('administer site configuration'),
+			'menu_name' => 'kdevteam',);
+	return $items;
+}
+
+/**
+ * @author amine.cherif
+ * @desc render ofadministration page admin/settings/kdevteam
+ * @return array()
+ */
+function kdevteam_admin_settings() {
+	global $allCt;
+	//JS TOOLS
+	$form['javascript'] = array('#type' => 'fieldset',
+			'#title' => t('JS administration'), '#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+			);
+
+	$form['javascript']['common'] = array('#type' => 'checkbox',
+			'#title' => t('Add common.js to FO '),
+			'#default_value' => variable_get('common', 0),
+			'#description' => t('If checked <b>common.js</b> will be added to front office.')
+			);
+	$form['javascript']['jCookies'] = array('#type' => 'checkbox',
+			'#title' => t('Add jCookies to FO '),
+			'#default_value' => variable_get('jCookies', 0),
+			'#description' => t('If checked <b>jCookies.js</b> will be added to front office.')
+	);
+	//TWITTER BOOTSTRAP TOOLS
+	$form['twitter_bootstrap'] = array('#type' => 'fieldset',
+			'#title' => t('Twitter Bootstrap'), '#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+	);
+	$form['twitter_bootstrap']['_twitter_bootstrap'] = array('#type' => 'checkbox',
+			'#title' => t('Add TWITTER BOOTSTRAP to FO '),
+			'#default_value' => variable_get('_twitter_bootstrap', 0),
+			'#description' => t('If checked <b>TWITTER BOOTSTRAP</b> will be added to front office.')
+	);
+	//FACEBOOK API TOOLS
+	$form['facebook_api'] = array('#type' => 'fieldset',
+			'#title' => t('Facebook API'), '#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+	);
+	$form['facebook_api']['fb_is_active'] = array('#type' => 'checkbox',
+			'#title' => t('Activate Facebook API'),
+			'#default_value' => variable_get('fb_is_active', 0),
+			'#description' => t('Check if you want to active facebook widgets <b>"like, send .."</b>.')
+	);
+	$form['facebook_api']['fb_app_id'] = array('#type' => 'textfield',
+			'#title' => t('Facebook application ID '),
+			'#default_value' => variable_get('fb_app_id', 0),
+			'#description' => t('Enter your Facebook application ID.')
+	);
+	$form['facebook_api']['fb_is_canvas'] = array('#type' => 'checkbox',
+			'#title' => t('Facebook Canvas Application'),
+			'#default_value' => variable_get('fb_is_canvas', 0),
+			'#description' => t('Check if it\'is a <b>"Facebook Canvas Application"</b>.')
+	);
+	foreach ($allCt as $key => $_type){
+    $form['facebook_api']['fb_'.$_type] = array(
+    '#type' => 'checkbox',
+        '#title' => t('Activate FB like button for !content content type', array("!content" => $_type)),
+        '#default_value' => variable_get('fb_'.$_type, 0),
+        '#description' => t('Check if u want to activate tweeter button for the content type : <b> !content </b>.',
+     array("!content" => $_type)),
+    );
+	}
+	$form['tweetr_api'] = array('#type' => 'fieldset',
+			'#title' => t('Tweeter API'), '#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+	);
+ 	
+ 	foreach ($allCt as $key => $_type){
+ 		$form['tweetr_api']['tb_'.$_type] = array('#type' => 'checkbox',
+ 				'#title' => t('Activate Twitter button for '.$_type.' content type'),
+ 				'#default_value' => variable_get('tb_'.$_type, 0),
+ 				'#description' => t('Check if u want to activate tweeter button for the content type : <b>"'.$_type.'"</b>.')
+ 		);
+ 	}
+	return system_settings_form($form);
+}
+
+/**
+ * Implements hook_node_view().
+ *
+ * Returns the renderable view of our nodes (pages or articles).
+ * We want to moddify the code so that we add the like button
+ * to our pages.
+ */
+function kdevteam_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+	switch ($op) {
+		case 'view':
+			if(variable_get('fb_'.$node->type,0)){
+			$node->content['facebook_like'] = array(
+			'#value' => theme('facebook_add_like_button'),);
+			}
+			if(variable_get('tb_'.$node->type,0)){
+			$node->content['tweeter'] = array(
+			'#value' => theme('tweeter_add_share_button'),);
+			}
+			if(variable_get('fb_is_active', 0)){
+			$node->content['facebook'] = array(
+			'#value' => theme('facebook_add_fb_script'),);
+			}
+			break;
+	}
+
+}
+/**
+ * Implements hook_theme().
+ *
+ * Just to let Drupal know about our theme function.
+ */
+function kdevteam_theme() {
+	return array(
+	'facebook_add_like_button' => array(
+	   'variables' => NULL
+	), 
+	'tweeter_add_share_button' => array(
+	   'variables' => NULL
+	), 
+	'facebook_add_fb_script' => array(
+	   'variables' => NULL
+	)
+	);
+}
+/**
+ * Function to add the desired code to our page.
+ */
+function theme_facebook_add_fb_script() {
+	$output = '<div id="fb-root"></div> <script src="http://connect.facebook.net/en_US/all.js#appId='.trim(variable_get('fb_is_canvas', 0)).'&xfbml=1"></script>';
+
+	return $output;
+}
+/**
+ * Function to add the desired code to our page.
+ */
+function theme_facebook_add_like_button() {
+	$output = '<fb:like href="http://www.facebook.com/profile.php?id=100000782572887" send="true" width="450" show_faces="true" font=""></fb:like>';
+
+	return $output;
+}
+/**
+ * Function to add the desired code to our page.
+ */
+function theme_tweeter_add_share_button() {
+	$output = '<a href="https://twitter.com/share" class="twitter-share-button">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>';
+
+	return $output;
+}
+/**
+ * Implements hook_block_info().
+ *
+ * Using this hook we declare to Drupal that our module
+ * provides one block identified as facebook
+ */
+function kdevteam_block($op = 'list', $delta = 0, $edit = array()) {
+
+
+	switch ($op) {
+		case 'list':
+			$blocks[0] = array('info' => t('Facebook Recent Activity'),);
+
+			return $blocks;
+		case 'view':
+			switch ($delta) {
+				case 0:
+					$block['subject'] = t('Facebook recent activity');
+					$block['content'] = '<script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script><fb:activity site="" width="170" height="500" header="false" font="" border_color="#fff" recommendations="false"></fb:activity>';
+
+			}
+
+			return $block;
+	}
+}
+

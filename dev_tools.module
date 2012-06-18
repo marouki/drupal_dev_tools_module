@@ -6,7 +6,7 @@
  *  
  */
 function add_jcookies_plugin() {
-	drupal_add_js(drupal_get_path('module', 'kdevteam') . '/js/jcookies.js');
+	drupal_add_js(drupal_get_path('module', 'dev_tools') . '/js/jcookies.js');
 }
 /**
  * @author amine.cherif
@@ -15,7 +15,7 @@ function add_jcookies_plugin() {
  *  
  */
 function add_commun_js() {
-	drupal_add_js(drupal_get_path('module', 'kdevteam') . '/js/common.js');
+	drupal_add_js(drupal_get_path('module', 'dev_tools') . '/js/common.js');
 }
 /**
  * @author amine.cherif
@@ -24,7 +24,7 @@ function add_commun_js() {
  *  
  */
 function add_twitter_bootsrap_js() {
-	drupal_add_js(drupal_get_path('module', 'kdevteam') . '/js/bootstrap.min.js');
+	drupal_add_js(drupal_get_path('module', 'dev_tools') . '/js/bootstrap.min.js');
 }
 /**
  * @author amine.cherif
@@ -33,20 +33,20 @@ function add_twitter_bootsrap_js() {
  *  
  */
 function add_twitter_bootsrap_css() {
-	drupal_add_css(drupal_get_path('module', 'kdevteam') . '/css/bootstrap.min.css','all', FALSE);
+	drupal_add_css(drupal_get_path('module', 'dev_tools') . '/css/bootstrap.min.css','all', FALSE);
 }
 
 /**
  * @desc call common php functions
  * @author amine.cherif
  */
-module_load_include('inc', 'kdevteam', 'includes/common');
+module_load_include('inc', 'dev_tools', 'includes/common');
 
 /**
  * hook init
  */
 
-function kdevteam_init(){
+function dev_tools_init(){
 	if('admin' != arg(0)){
 		variable_get('_twitter_bootstrap', 0) ? add_twitter_bootsrap_css() : 0;
 	}
@@ -55,7 +55,7 @@ function kdevteam_init(){
 /**
  * hook preprocess_page
  */
-function kdevteam_preprocess_page(&$vars, $hook){
+function dev_tools_preprocess_page(&$vars, $hook){
 	if('admin' != arg(0)){
 		variable_get('common', 0) ? add_commun_js() : 0;
 		variable_get('jCookies', 0) ? add_jcookies_plugin() : 0;
@@ -69,7 +69,7 @@ function kdevteam_preprocess_page(&$vars, $hook){
  * @param unknown_type $vars
  * @param unknown_type $hook
  */
-function kdevteam_preprocess_node(&$vars, $hook) {
+function dev_tools_preprocess_node(&$vars, $hook) {
 
 	
 
@@ -90,24 +90,24 @@ function kdevteam_preprocess_node(&$vars, $hook) {
  * hook menu
  */
 
-function kdevteam_menu() {
+function dev_tools_menu() {
 	$items = array();
-	$items['admin/mytools/kdevteam'] = array(
+	$items['admin/mytools/dev_tools'] = array(
 			'title' => 'Kdev Team Tools settings',
 			'description' => 'Helper functions, to assist Drupal developers.',
 			'page callback' => 'drupal_get_form',
-			'page arguments' => array('kdevteam_admin_settings'),
+			'page arguments' => array('dev_tools_admin_settings'),
 			'access arguments' => array('administer site configuration'),
-			'menu_name' => 'kdevteam',);
+			'menu_name' => 'dev_tools',);
 	return $items;
 }
 
 /**
  * @author amine.cherif
- * @desc render ofadministration page admin/settings/kdevteam
+ * @desc render ofadministration page admin/settings/dev_tools
  * @return array()
  */
-function kdevteam_admin_settings() {
+function dev_tools_admin_settings() {
 	global $allCt;
 	//JS TOOLS
 	$form['javascript'] = array('#type' => 'fieldset',
@@ -186,7 +186,7 @@ function kdevteam_admin_settings() {
  * We want to moddify the code so that we add the like button
  * to our pages.
  */
-function kdevteam_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+function dev_tools_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 	switch ($op) {
 		case 'view':
 			if(variable_get('fb_'.$node->type,0)){
@@ -210,7 +210,7 @@ function kdevteam_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  *
  * Just to let Drupal know about our theme function.
  */
-function kdevteam_theme() {
+function dev_tools_theme() {
 	return array(
 	'facebook_add_like_button' => array(
 	   'variables' => NULL
@@ -254,7 +254,7 @@ function theme_tweeter_add_share_button() {
  * Using this hook we declare to Drupal that our module
  * provides one block identified as facebook
  */
-function kdevteam_block($op = 'list', $delta = 0, $edit = array()) {
+function dev_tools_block($op = 'list', $delta = 0, $edit = array()) {
 
 
 	switch ($op) {
